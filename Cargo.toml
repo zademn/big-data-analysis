@@ -1,0 +1,20 @@
+[package]
+name = "cluster-rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+criterion = "0.4.0"
+csv = "1.1.6"
+itertools = "0.10.5"
+num-traits = "0.2.15"
+plotters = "0.3.4"
+rand = "0.8.5"
+rayon = "1.6.1"
+serde = { version = "1.0.152", features = ["derive"] }
+
+[[bench]]
+name = "kmeans"
+harness = false
