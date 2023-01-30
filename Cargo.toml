@@ -18,3 +18,7 @@ serde = { version = "1.0.152", features = ["derive"] }
 [[bench]]
 name = "kmeans"
 harness = false
+
+[[bench]]
+name = "cmeans"
+harness = false

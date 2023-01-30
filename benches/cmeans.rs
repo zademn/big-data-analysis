@@ -1,4 +1,4 @@
-use cluster_rs::kmeans::{KMeans, KMeansParams};
+use cluster_rs::cmeans::{CMeans, CMeansParams};
 use criterion::{criterion_group, criterion_main, Criterion};
 use serde::Deserialize;
 
@@ -11,8 +11,8 @@ struct IrisRecord {
     label: String,
 }
 
-pub fn kmeans_benchmark(c: &mut Criterion) {
-    let mut group = c.benchmark_group("kmeans");
+pub fn cmeans_benchmark(c: &mut Criterion) {
+    let mut group = c.benchmark_group("cmeans");
 
     for size in [150, 1_500, 15_000, 150_000, 1_500_000, 15_000_000] {
         let filename = format!("Iris-{}.txt", size);
@@ -32,14 +32,13 @@ pub fn kmeans_benchmark(c: &mut Criterion) {
             .sample_size(10)
             .bench_function(format!("iris-{}, parallelized=false", size), |b| {
                 b.iter(|| {
-                    let params = KMeansParams::default()
+                    let params = CMeansParams::default()
                         .n_clusters(15)
                         .parallelized(false)
-                        .n_init(10)
                         .max_iter(100)
                         .tol(0.001);
-                    let km = KMeans::new(params);
-                    km.fit(&data);
+                    let cm = CMeans::new(params);
+                    cm.fit(&data);
                 })
             });
 
@@ -47,18 +46,17 @@ pub fn kmeans_benchmark(c: &mut Criterion) {
             .sample_size(10)
             .bench_function(format!("iris-{}, parallelized=true", size), |b| {
                 b.iter(|| {
-                    let params = KMeansParams::default()
+                    let params = CMeansParams::default()
                         .n_clusters(15)
                         .parallelized(true)
-                        .n_init(10)
                         .max_iter(100)
                         .tol(0.001);
-                    let km = KMeans::new(params);
-                    km.fit(&data);
+                    let cm = CMeans::new(params);
+                    cm.fit(&data);
                 })
             });
     }
 }
 
-criterion_group!(kmeans, kmeans_benchmark);
-criterion_main!(kmeans);
+criterion_group!(cmeans, cmeans_benchmark);
+criterion_main!(cmeans);
