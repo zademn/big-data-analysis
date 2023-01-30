@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt;
 use std::time::{Duration, Instant};
 
@@ -114,6 +115,7 @@ impl<F: Float> Default for CMeansParams<F> {
 struct CMResults<F: Float> {
     pub(crate) centroids: Vec<Vec<F>>,
     pub(crate) memberships: Vec<Vec<F>>,
+    pub(crate) labels: Vec<usize>,
 }
 // State types
 #[derive(Default, Clone)]
@@ -284,6 +286,16 @@ impl<F: Float + Send + Sync + fmt::Debug> CMeans<F, Init> {
                 break;
             }
         }
+        let labels: Vec<usize> = best_memberships
+            .iter()
+            .map(|memb| {
+                memb.iter()
+                    .enumerate()
+                    .max_by(|(_, &a), (_, b)| a.partial_cmp(b).unwrap_or(Ordering::Equal))
+                    .map(|(index, _)| index)
+                    .unwrap()
+            })
+            .collect();
         if self.params.verbose {
             println!("Total time {}ms", total_time.as_millis());
             println!(
@@ -300,6 +312,7 @@ impl<F: Float + Send + Sync + fmt::Debug> CMeans<F, Init> {
             state: Built(CMResults {
                 centroids,
                 memberships: best_memberships,
+                labels,
             }),
         }
     }
@@ -309,8 +322,11 @@ impl<F: Float> CMeans<F, Built<F>> {
     pub fn centroids(&self) -> Vec<Vec<F>> {
         self.state.0.centroids.clone()
     }
-    pub fn labels(&self) -> Vec<Vec<F>> {
+    pub fn memberships(&self) -> Vec<Vec<F>> {
         self.state.0.memberships.clone()
+    }
+    pub fn labels(&self) -> Vec<usize> {
+        self.state.0.labels.clone()
     }
     // pub fn dists(&self) -> Vec<F> {
     //     self.state.0.dists.clone()

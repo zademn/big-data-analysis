@@ -3,25 +3,20 @@ use std::{time::Instant, vec};
 use cluster_rs::cmeans::{CMeans, CMeansParams};
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
-struct IrisRecord {
-    col1: f64,
-    col2: f64,
-    col3: f64,
-    col4: f64,
-    label: String,
-}
 fn main() {
     let mut data: Vec<Vec<_>> = vec![];
     let mut reader = csv::ReaderBuilder::new()
         .has_headers(false)
-        .from_path("data/BDA/Dataset 1/Iris-150.txt")
+        .from_path("data/BDA/Dataset 2/Dataset2.csv")
         .expect("Failed to open csv");
 
-    for record in reader.deserialize() {
-        let record: IrisRecord = record.unwrap();
-        let mut row = vec![vec![record.col1, record.col2, record.col3, record.col4]];
-        data.append(&mut row);
+    for record in reader.records() {
+        let mut row = record
+            .unwrap()
+            .iter()
+            .map(|e| e.parse::<f64>().unwrap())
+            .collect();
+        data.push(row);
     }
     println!("Data length {}", data.len());
     let params = CMeansParams::default()
